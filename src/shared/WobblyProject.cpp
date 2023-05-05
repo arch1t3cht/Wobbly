@@ -3274,12 +3274,15 @@ bool WobblyProject::guessSectionPatternsFromMics(int section_start, int minimum_
     if (section_end == getNumFrames(PostSource) && getMatch(section_end - 1) == 'n')
         setMatch(section_end - 1, 'b');
 
-    // If the last frame of the section has much higher mic with c/n matches than with b match, use the b match.
+    // If the last frame of the section has much higher mic with n matches than with b match, use the b match.
     char match_index = matchCharToIndex(getMatch(section_end - 1));
-    int16_t mic_cn = getMics(section_end - 1)[match_index];
-    int16_t mic_b = getMics(section_end - 1)[matchCharToIndex('b')];
-    if (mic_cn > mic_b * 2)
-        setMatch(section_end - 1, 'b');
+
+    if (match_index == 'n') {
+        int16_t mic_n = getMics(section_end - 1)[matchCharToIndex('n')];
+        int16_t mic_b = getMics(section_end - 1)[matchCharToIndex('b')];
+        if (mic_n > mic_b * 2)
+            setMatch(section_end - 1, 'b');
+    }
 
     if (patterns[best_pattern].pattern == "c") {
         for (int i = section_start; i < section_end; i++)
@@ -3403,10 +3406,13 @@ bool WobblyProject::guessSectionPatternsFromDMetrics(int section_start, int mini
 
     // use b match if the range end is too bad at the end of the section
     char match_index = matchCharToIndexDMetrics(getMatch(section_end - 1));
-    int32_t mmet_cn = getMMetrics(section_end - 1)[match_index];
-    int32_t mmet_n = getMMetrics(section_end - 1)[matchCharToIndexDMetrics('b')];
-    if (mmet_cn > mmet_n * 1.5)
-        setMatch(section_end - 1, 'b');
+
+    if (match_index == 'n') {
+        int32_t mmet_n = getMMetrics(section_end - 1)[matchCharToIndexDMetrics('n')];
+        int32_t mmet_b = getMMetrics(section_end - 1)[matchCharToIndexDMetrics('b')];
+        if (mmet_n > mmet_b * 1.5)
+            setMatch(section_end - 1, 'b');
+    }
 
     if (patterns[best_pattern].pattern == "c") {
         for (int i = section_start; i < section_end; i++)
@@ -3571,19 +3577,25 @@ bool WobblyProject::guessSectionPatternsFromMicsAndDMetrics(int section_start, i
         setMatch(0, 'n');
 
     if (good_mics) {
-        // If the last frame of the section has much higher mic with c/n matches than with b match, use the b match.
+        // If the last frame of the section has much higher mic with n matches than with b match, use the b match.
         char match_index = matchCharToIndex(getMatch(section_end - 1));
-        int16_t mic_cn = getMics(section_end - 1)[match_index];
-        int16_t mic_b = getMics(section_end - 1)[matchCharToIndex('b')];
-        if (mic_cn > mic_b * 2)
-            setMatch(section_end - 1, 'b');
+
+        if (match_index == 'n') {
+            int16_t mic_n = getMics(section_end - 1)[matchCharToIndex('n')];
+            int16_t mic_b = getMics(section_end - 1)[matchCharToIndex('b')];
+            if (mic_n > mic_b * 2)
+                setMatch(section_end - 1, 'b');
+        }
     } else {
         // use b match if the range end is too bad at the end of the section
         char match_index = matchCharToIndexDMetrics(getMatch(section_end - 1));
-        int32_t mmet_cn = getMMetrics(section_end - 1)[match_index];
-        int32_t mmet_n = getMMetrics(section_end - 1)[matchCharToIndexDMetrics('b')];
-        if (mmet_cn > mmet_n * 1.5)
-            setMatch(section_end - 1, 'b');
+
+        if (match_index == 'n') {
+            int32_t mmet_n = getMMetrics(section_end - 1)[matchCharToIndexDMetrics('n')];
+            int32_t mmet_b = getMMetrics(section_end - 1)[matchCharToIndexDMetrics('b')];
+            if (mmet_n > mmet_b * 1.5)
+                setMatch(section_end - 1, 'b');
+        }
     }
 
     if (best_pattern == "c") {
@@ -3745,12 +3757,15 @@ bool WobblyProject::guessSectionPatternsFromMatches(int section_start, int minim
             }
         }
 
-        // If the last frame of the section has much higher mic with c/n matches than with b match, use the b match.
+        // If the last frame of the section has much higher mic with n matches than with b match, use the b match.
         char match_index = matchCharToIndex(getMatch(section_end - 1));
-        int16_t mic_cn = getMics(section_end - 1)[match_index];
-        int16_t mic_b = getMics(section_end - 1)[matchCharToIndex('b')];
-        if (mic_cn > mic_b * 2)
-            setMatch(section_end - 1, 'b');
+
+        if (match_index == 'n') {
+            int16_t mic_n = getMics(section_end - 1)[matchCharToIndex('n')];
+            int16_t mic_b = getMics(section_end - 1)[matchCharToIndex('b')];
+            if (mic_n > mic_b * 2)
+                setMatch(section_end - 1, 'b');
+        }
 
         // A pattern was found.
         pattern_guessing.failures.erase(section_start);
