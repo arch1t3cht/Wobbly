@@ -4088,7 +4088,20 @@ void WobblyProject::presetsToScript(std::string &script) const {
 
 
 void WobblyProject::sourceToScript(std::string &script, bool save_node) const {
-    std::string src = "src = c." + source_filter + "(r'" + handleSingleQuotes(input_file) + "')\n";
+    std::string src;
+    if (source_filter == "VapourSynth") {
+        // Squeeze everything on one line here as a dirty hack to allow this to go into an indent later on
+        QString loadscript = QStringLiteral(
+                    "with open(r'%1') as __w_f__:"
+                    "exec(compile(__w_f__.read(), r'%1', 'exec'));"
+                    "src = vs.get_output(index=0);"
+                    "src = src[0] if isinstance(src, vs.VideoOutputTuple) else src;"
+                    "vs.clear_output(0)\n"
+        );
+        src = loadscript.arg(QString::fromStdString(handleSingleQuotes(input_file))).toStdString();
+    } else {
+        std::string src = "src = c." + source_filter + "(r'" + handleSingleQuotes(input_file) + "')\n";
+    }
 
     if (save_node) {
     script +=

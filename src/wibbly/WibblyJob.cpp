@@ -238,17 +238,32 @@ void WibblyJob::headerToScript(std::string &script) const {
 void WibblyJob::sourceToScript(std::string &script) const {
     std::string fixed_input_file = handleSingleQuotes(input_file);
 
+    script += "def __w_getsrc__():\n";
+
+    if (source_filter == "VapourSynth") {
+        script +=
+                "    with open(r'" + fixed_input_file + "') as __w_f__:\n"
+                "        exec(compile(__w_f__.read(), r'" + fixed_input_file + "', 'exec'))\n"
+                "        src = vs.get_output(index=0)\n"
+                "        src = src[0] if isinstance(src, vs.VideoOutputTuple) else src\n"
+                "        vs.clear_output(0)\n"
+                "        return src\n";
+    } else {
+        script += "    return c." + source_filter + "(r'" + fixed_input_file + "')\n";
+    }
+
     script +=
+            "\n"
             "if wibbly_last_input_file == r'" + fixed_input_file + "':\n"
             "    try:\n"
             "        src = vs.get_output(index=1)\n"
             "        if isinstance(src, vs.VideoOutputTuple):\n"
             "            src = src[0]\n"
             "    except KeyError:\n"
-            "        src = c." + source_filter + "(r'" + fixed_input_file + "')\n"
+            "        src = __w_getsrc__()\n"
             "        src.set_output(index=1)\n"
             "else:\n"
-            "    src = c." + source_filter + "(r'" + fixed_input_file + "')\n"
+            "    src = __w_getsrc__()\n"
             "    src.set_output(index=1)\n"
             "    wibbly_last_input_file = r'" + fixed_input_file + "'\n"
             "\n";

@@ -3848,28 +3848,37 @@ void WobblyWindow::openProject() {
 
 void WobblyWindow::realOpenVideo(const QString &path) {
     try {
+        QString extension = path.mid(path.lastIndexOf('.') + 1);
+        QString script;
         QString source_filter;
 
-        QString extension = path.mid(path.lastIndexOf('.') + 1);
+        if (extension == "vpy" || extension == "py") {
+            script = QStringLiteral(
+                        "with open(r'%1') as __w_f__:\n"
+                        "    exec(compile(__w_f__.read(), r'%1', 'exec'))\n");
 
-        QStringList mp4 = { "mp4", "m4v", "mov" };
+            script = script.arg(QString::fromStdString(handleSingleQuotes(path.toStdString())));
+            source_filter = "VapourSynth";
+        } else {
+            QStringList mp4 = { "mp4", "m4v", "mov" };
 
-        if (extension == "dgi")
-            source_filter = "dgdecodenv.DGSource";
-        else if (extension == "d2v")
-            source_filter = "d2v.Source";
-        else if (mp4.contains(extension))
-            source_filter = "lsmas.LibavSMASHSource";
-        else
-            source_filter = "lsmas.LWLibavSource";
+            if (extension == "dgi")
+                source_filter = "dgdecodenv.DGSource";
+            else if (extension == "d2v")
+                source_filter = "d2v.Source";
+            else if (mp4.contains(extension))
+                source_filter = "lsmas.LibavSMASHSource";
+            else
+                source_filter = "lsmas.LWLibavSource";
 
-        QString script = QStringLiteral(
-                    "import vapoursynth as vs\n"
-                    "\n"
-                    "c = vs.core\n"
-                    "\n"
-                    "c.%1(r'%2').set_output()\n");
-        script = script.arg(source_filter).arg(QString::fromStdString(handleSingleQuotes(path.toStdString())));
+            script = QStringLiteral(
+                        "import vapoursynth as vs\n"
+                        "\n"
+                        "c = vs.core\n"
+                        "\n"
+                        "c.%1(r'%2').set_output()\n");
+            script = script.arg(source_filter).arg(QString::fromStdString(handleSingleQuotes(path.toStdString())));
+        }
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
 

@@ -1139,6 +1139,8 @@ void WibblyWindow::realOpenVideo(const QString &path) {
         source_filter = "d2v.Source";
     else if (mp4.contains(extension))
         source_filter = "lsmas.LibavSMASHSource";
+    else if (extension == "vpy" || extension == "py")
+        source_filter = "VapourSynth";
     else
         source_filter = "lsmas.LWLibavSource";
 
